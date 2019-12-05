@@ -45,7 +45,7 @@ class FlutterOssPlugin(private val registrar: Registrar, private val methodChann
                 provider = authCredentialsProviderCache[it]
             } else {
                 provider = OSSAuthCredentialsProvider(it)
-                authCredentialsProviderCache.put(stsServer, provider)
+                authCredentialsProviderCache[stsServer] = provider
             }
 
             startToUploadAsync(call, provider)
@@ -78,7 +78,7 @@ class FlutterOssPlugin(private val registrar: Registrar, private val methodChann
                 methodChannel.invokeMethod(resultMethod,{
                     "isSuccess" to true
                     "completerId" to completerId
-                    "code" to 1
+                    "code" to 0
                     "remotePath" to result.serverCallbackReturnBody
                 })
             }

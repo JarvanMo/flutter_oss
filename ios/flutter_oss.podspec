@@ -15,6 +15,9 @@ Flutter plugin for Ali OSS
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
+  s.dependency 'AliyunOSSiOS'
+  s.frameworks = ["CoreTelephony","SystemConfiguration"]
+  s.libraries = ["resolv"]
 
   s.ios.deployment_target = '8.0'
 end
