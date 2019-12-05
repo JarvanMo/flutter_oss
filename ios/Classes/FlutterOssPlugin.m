@@ -12,10 +12,13 @@
 
 NSObject <FlutterPluginRegistrar> *_OSSRegistrar;
 FlutterMethodChannel *_OSSMethodChannel;
-NSMutableDictionary *_authCredentialsProviderCache = [[NSMutableDictionary alloc] init];
+NSMutableDictionary *_authCredentialsProviderCache ;
 
 - (instancetype)initWithRegistrar:(NSObject <FlutterPluginRegistrar> *)registrar methodChannel:(FlutterMethodChannel *)flutterMethodChannel {
     self = [super init];
+    if(self){
+        _authCredentialsProviderCache = [[NSMutableDictionary alloc] init];
+    }
     _OSSRegistrar = registrar;
     _OSSMethodChannel = flutterMethodChannel;
     return self;
