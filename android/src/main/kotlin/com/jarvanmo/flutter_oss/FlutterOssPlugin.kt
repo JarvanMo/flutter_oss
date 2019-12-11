@@ -26,7 +26,7 @@ class FlutterOssPlugin(private val registrar: Registrar, private val methodChann
         }
     }
 
-    val handler = Handler(Looper.getMainLooper())
+    private val handler = Handler(Looper.getMainLooper())
 
     private val authCredentialsProviderCache: HashMap<String, OSSAuthCredentialsProvider> = hashMapOf()
 
@@ -74,12 +74,12 @@ class FlutterOssPlugin(private val registrar: Registrar, private val methodChann
         val endpoint = call.argument<String?>("endpoint")
         val objectName = call.argument<String>("objectName")
         val filePath = call.argument<String>("filePath")
-        
+        val bucketName = call.argument<String>("bucketName")
 
         thread {
             try {
                 val oss: OSS = OSSClient(context, endpoint, provider)
-                val put = PutObjectRequest(call.argument<String>("bucketName"), objectName, filePath)
+                val put = PutObjectRequest(bucketName, objectName, filePath)
                 val result: PutObjectResult = oss.putObject(put)
                 handler.post {
                     methodChannel.invokeMethod(resultMethod, mapOf(
