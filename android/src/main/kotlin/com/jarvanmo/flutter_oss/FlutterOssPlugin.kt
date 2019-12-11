@@ -82,31 +82,31 @@ class FlutterOssPlugin(private val registrar: Registrar, private val methodChann
                 val put = PutObjectRequest(call.argument<String>("bucketName"), objectName, filePath)
                 val result: PutObjectResult = oss.putObject(put)
                 handler.post {
-                    methodChannel.invokeMethod(resultMethod, {
-                        "isSuccess" to true
-                        "completerId" to completerId
-                        "code" to 0
+                    methodChannel.invokeMethod(resultMethod, mapOf(
+                        "isSuccess" to true,
+                        "completerId" to completerId,
+                        "code" to 0,
                         "remotePath" to result.serverCallbackReturnBody
-                    })
+                    ))
                 }
 
             } catch (clientExcepion: ClientException) { // 本地异常，如网络异常等。
                 handler.post {
-                    methodChannel.invokeMethod(resultMethod, {
-                        "isSuccess" to false
-                        "completerId" to completerId
-                        "message" to clientExcepion.message
+                    methodChannel.invokeMethod(resultMethod, mapOf(
+                        "isSuccess" to false,
+                        "completerId" to completerId,
+                        "message" to clientExcepion.message,
                         "code" to -2
-                    })
+                    ))
                 }
             } catch (serviceException: ServiceException) { // 服务异常。
                 handler.post {
-                    methodChannel.invokeMethod(resultMethod, {
-                        "isSuccess" to false
-                        "completerId" to completerId
-                        "message" to serviceException.rawMessage
+                    methodChannel.invokeMethod(resultMethod, mapOf(
+                        "isSuccess" to false,
+                        "completerId" to completerId,
+                        "message" to serviceException.rawMessage,
                         "code" to -3
-                    })
+                        ))
                 }
             }
         }
