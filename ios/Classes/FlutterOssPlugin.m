@@ -65,7 +65,7 @@ OSSClient *client ;
             [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
         } else {
             NSDictionary *dictionary =@{
-                    @"isSuccess":@YES,
+                    @"isSuccess":@NO,
                     @"completerId":completerId,
                     @"code":@-1,
                     @"message":task.error
