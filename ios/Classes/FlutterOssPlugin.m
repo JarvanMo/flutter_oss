@@ -13,7 +13,7 @@
 NSObject <FlutterPluginRegistrar> *_OSSRegistrar;
 FlutterMethodChannel *_OSSMethodChannel;
 NSMutableDictionary *_authCredentialsProviderCache ;
-
+OSSClient *client ;
 - (instancetype)initWithRegistrar:(NSObject <FlutterPluginRegistrar> *)registrar methodChannel:(FlutterMethodChannel *)flutterMethodChannel {
     self = [super init];
     if(self){
@@ -53,7 +53,7 @@ NSMutableDictionary *_authCredentialsProviderCache ;
     put.objectKey = objectName;
     put.uploadingFileURL = [NSURL fileURLWithPath:filePath];
 
-    OSSClient *client = [[OSSClient alloc] initWithEndpoint:endpoint credentialProvider:credential];
+    client = [[OSSClient alloc] initWithEndpoint:endpoint credentialProvider:credential];
     OSSTask * putTask = [client putObject:put];
     [putTask continueWithBlock:^id(OSSTask *task) {
         if (!task.error) {
