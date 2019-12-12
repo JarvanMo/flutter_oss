@@ -8,7 +8,7 @@ final MethodChannel _channel = const MethodChannel('com.jarvanmo/flutter_oss')
   ..setMethodCallHandler(_handler);
 
 StreamController<OSSResult> _uploadResultStream =
-    new StreamController.broadcast();
+new StreamController.broadcast();
 
 /// Response from share
 Stream<OSSResult> get uploadResultStream => _uploadResultStream.stream;
@@ -19,7 +19,9 @@ Future<dynamic> _handler(MethodCall methodCall) {
         isSuccess: methodCall.arguments["isSuccess"],
         completerId: methodCall.arguments["completerId"],
         code: methodCall.arguments["code"],
-        remotePath: methodCall.arguments["remotePath"]));
+        remotePath: methodCall.arguments["remotePath"],
+        message: methodCall.arguments['message']
+    ));
   }
   return Future.value();
 }
@@ -82,6 +84,8 @@ class OSSResult {
   final String completerId;
   final int code;
   final String remotePath;
+  final String message;
 
-  OSSResult({this.isSuccess, this.completerId, this.code, this.remotePath});
+  OSSResult(
+      {this.isSuccess, this.completerId, this.code, this.remotePath, this.message});
 }
