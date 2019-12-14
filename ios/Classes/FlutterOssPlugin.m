@@ -57,9 +57,6 @@ NSMutableDictionary *_authCredentialsProviderCache;
 
     BOOL isDir = NO;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL aaaaa = [fileManager fileExistsAtPath:filePath isDirectory:&isDir];
-    NSLog(@"log %@", endpoint);
-    NSLog(@"log %d", aaaaa);
     OSSTask *putTask = [_ossClient putObject:put];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [putTask continueWithBlock:^id(OSSTask *task) {
