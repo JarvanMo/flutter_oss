@@ -8,7 +8,9 @@ final MethodChannel _channel = const MethodChannel('com.jarvanmo/flutter_oss')
   ..setMethodCallHandler(_handler);
 
 StreamController<OSSResult> _uploadResultStream =
-new StreamController.broadcast();
+    new StreamController.broadcast();
+
+typedef OSSResultCallBack = void Function(OSSResult);
 
 /// Response from share
 Stream<OSSResult> get uploadResultStream => _uploadResultStream.stream;
@@ -20,8 +22,7 @@ Future<dynamic> _handler(MethodCall methodCall) {
         completerId: methodCall.arguments["completerId"],
         code: methodCall.arguments["code"],
         remotePath: methodCall.arguments["remotePath"],
-        message: methodCall.arguments['message']
-    ));
+        message: methodCall.arguments['message']));
   }
   return Future.value();
 }
@@ -30,15 +31,16 @@ class OSSClient {
   static OSSClient _client;
 
   Map<String, Completer> _completerPool = {};
+  Map<String, OSSResultCallBack> _callbackPool = {};
 
   StreamSubscription _streamSubscription;
 
   OSSClient._() {
     _streamSubscription = uploadResultStream.listen((result) {
-      if (_completerPool.containsKey(result.completerId)) {
-        var completer = _completerPool[result.completerId];
-        completer.complete(result);
-        _completerPool.remove(result.completerId);
+      if (_callbackPool.containsKey(result.completerId)) {
+        var completer = _callbackPool[result.completerId];
+        completer(result);
+        _callbackPool.remove(result.completerId);
       }
     });
   }
@@ -50,19 +52,22 @@ class OSSClient {
     return _client;
   }
 
-  Future<OSSResult> uploadByPathAsync({
+  Future uploadByPathAsync({
     @required String filePath,
     @required String objectName,
     @required String stsServer,
     @required String bucketName,
     @required String endpoint,
+    @required OSSResultCallBack callback,
+    String completerId,
   }) async {
     assert(stsServer != null || stsServer.isNotEmpty);
     assert(bucketName != null || bucketName.isNotEmpty);
-    var id = Uuid().v4();
+    var id = completerId ?? Uuid().v4();
     var completer = Completer<OSSResult>();
 
     _completerPool[id] = completer;
+    _callbackPool[id] = callback;
     await _channel.invokeMethod("FlutterOSS: uploadAsync", {
       "stsServer": stsServer,
       "bucketName": bucketName,
@@ -71,7 +76,7 @@ class OSSClient {
       "filePath": filePath,
       "objectName": objectName
     });
-    return await completer.future;
+    return Future.value();
   }
 }
 
@@ -87,5 +92,9 @@ class OSSResult {
   final String message;
 
   OSSResult(
-      {this.isSuccess, this.completerId, this.code, this.remotePath, this.message});
+      {this.isSuccess,
+      this.completerId,
+      this.code,
+      this.remotePath,
+      this.message});
 }
