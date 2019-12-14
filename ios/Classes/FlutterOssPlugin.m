@@ -1,6 +1,7 @@
 #import "FlutterOssPlugin.h"
 #import <AliyunOSSiOS/OSSService.h>
 
+
 @implementation FlutterOssPlugin
 + (void)registerWithRegistrar:(NSObject <FlutterPluginRegistrar> *)registrar {
     FlutterMethodChannel *channel = [FlutterMethodChannel
@@ -13,7 +14,7 @@
 NSObject <FlutterPluginRegistrar> *_OSSRegistrar;
 FlutterMethodChannel *_OSSMethodChannel;
 NSMutableDictionary *_authCredentialsProviderCache ;
-OSSClient *client ;
+
 - (instancetype)initWithRegistrar:(NSObject <FlutterPluginRegistrar> *)registrar methodChannel:(FlutterMethodChannel *)flutterMethodChannel {
     self = [super init];
     if(self){
@@ -36,11 +37,9 @@ OSSClient *client ;
 - (void)uploadAsync:(FlutterMethodCall *)call result:(FlutterResult)result {
 //    id<OSSCredentialProvider> credential = [[OSSAuthCredentialProvider alloc] initWithAuthServerUrl:@"应用服务器地址，例如http://abc.com:8080"];
     NSString *stsServer = call.arguments[@"stsServer"];
-    id <OSSCredentialProvider> credential = _authCredentialsProviderCache[stsServer];
-    if (!credential) {
-        credential = [[OSSAuthCredentialProvider alloc] initWithAuthServerUrl:stsServer];
-        _authCredentialsProviderCache[stsServer] = credential;
-    }
+    id <OSSCredentialProvider> credential = [[OSSAuthCredentialProvider alloc] initWithAuthServerUrl:stsServer];
+//        credential = [[OSSAuthCredentialProvider alloc] initWithAuthServerUrl:stsServer];
+
     NSString *bucketName = call.arguments[@"bucketName"];
     NSString *endpoint = call.arguments[@"endpoint"];
     NSString *completerId = call.arguments[@"completerId"];
@@ -53,27 +52,46 @@ OSSClient *client ;
     put.objectKey = objectName;
     put.uploadingFileURL = [NSURL fileURLWithPath:filePath];
 
-    client = [[OSSClient alloc] initWithEndpoint:endpoint credentialProvider:credential];
-    OSSTask * putTask = [client putObject:put];
-    [putTask continueWithBlock:^id(OSSTask *task) {
-        if (!task.error) {
-            NSDictionary *dictionary =@{
-                    @"isSuccess":@YES,
-                    @"completerId":completerId,
-                    @"code":@0
-            };
-            [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
-        } else {
-            NSDictionary *dictionary =@{
-                    @"isSuccess":@NO,
-                    @"completerId":completerId,
-                    @"code":@-1,
-                    @"message":task.error
-            };
-            [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
-        }
-        return nil;
-    }];
+//    put.uploadingData = [NSData dataWithContentsOfFile:filePath];
+    _ossClient = [[OSSClient alloc] initWithEndpoint:endpoint credentialProvider:credential];
+
+
+    BOOL isDir = NO;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL aaaaa = [fileManager fileExistsAtPath:filePath isDirectory:&isDir];
+    NSLog(@"log %@",endpoint);
+    NSLog(@"log %d",aaaaa);
+    OSSTask * putTask = [_ossClient putObject:put];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [putTask continueWithBlock:^id(OSSTask *task) {
+        //        task = [_ossClient presignPublicURLWithBucketName:bucketName
+        //        withObjectKey:objectName];
+                 dispatch_async(dispatch_get_main_queue(), ^{
+
+                     if (!task.error) {
+                                NSDictionary *dictionary =@{
+                                        @"isSuccess":@YES,
+                                        @"completerId":completerId,
+                                        @"code":@0
+                                };
+                         NSLog(@"dic %@",dictionary);
+                                [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
+                            } else {
+                                NSDictionary *dictionary =@{
+                                        @"isSuccess":@NO,
+                                        @"completerId":completerId,
+                                        @"code":@-1,
+                                        @"message":task.error
+                                };
+                                [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
+                            }
+
+                 });
+               return nil;
+
+            }];
+    });
+
 
 }
 
