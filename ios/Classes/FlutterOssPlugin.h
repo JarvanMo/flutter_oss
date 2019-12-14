@@ -1,4 +1,5 @@
 #import <Flutter/Flutter.h>
-
-@interface FlutterOssPlugin : NSObject<FlutterPlugin>
+#import <AliyunOSSiOS/OSSService.h>
+@interface FlutterOssPlugin : NSObject<FlutterPlugin>{}
+@property (nonatomic, strong) OSSClient *ossClient;
 @end

@@ -1,5 +1,4 @@
 #import "FlutterOssPlugin.h"
-#import <AliyunOSSiOS/OSSService.h>
 
 
 @implementation FlutterOssPlugin
@@ -13,11 +12,11 @@
 
 NSObject <FlutterPluginRegistrar> *_OSSRegistrar;
 FlutterMethodChannel *_OSSMethodChannel;
-NSMutableDictionary *_authCredentialsProviderCache ;
+NSMutableDictionary *_authCredentialsProviderCache;
 
 - (instancetype)initWithRegistrar:(NSObject <FlutterPluginRegistrar> *)registrar methodChannel:(FlutterMethodChannel *)flutterMethodChannel {
     self = [super init];
-    if(self){
+    if (self) {
         _authCredentialsProviderCache = [[NSMutableDictionary alloc] init];
     }
     _OSSRegistrar = registrar;
@@ -46,7 +45,7 @@ NSMutableDictionary *_authCredentialsProviderCache ;
     NSString *filePath = call.arguments[@"filePath"];
     NSString *objectName = call.arguments[@"objectName"];
 
-    OSSPutObjectRequest * put = [OSSPutObjectRequest new];
+    OSSPutObjectRequest *put = [OSSPutObjectRequest new];
 // 必填字段
     put.bucketName = bucketName;
     put.objectKey = objectName;
@@ -59,37 +58,36 @@ NSMutableDictionary *_authCredentialsProviderCache ;
     BOOL isDir = NO;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL aaaaa = [fileManager fileExistsAtPath:filePath isDirectory:&isDir];
-    NSLog(@"log %@",endpoint);
-    NSLog(@"log %d",aaaaa);
-    OSSTask * putTask = [_ossClient putObject:put];
+    NSLog(@"log %@", endpoint);
+    NSLog(@"log %d", aaaaa);
+    OSSTask *putTask = [_ossClient putObject:put];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [putTask continueWithBlock:^id(OSSTask *task) {
-        //        task = [_ossClient presignPublicURLWithBucketName:bucketName
-        //        withObjectKey:objectName];
-                 dispatch_async(dispatch_get_main_queue(), ^{
+            //        task = [_ossClient presignPublicURLWithBucketName:bucketName
+            //        withObjectKey:objectName];
+            dispatch_async(dispatch_get_main_queue(), ^{
 
-                     if (!task.error) {
-                                NSDictionary *dictionary =@{
-                                        @"isSuccess":@YES,
-                                        @"completerId":completerId,
-                                        @"code":@0
-                                };
-                         NSLog(@"dic %@",dictionary);
-                                [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
-                            } else {
-                                NSDictionary *dictionary =@{
-                                        @"isSuccess":@NO,
-                                        @"completerId":completerId,
-                                        @"code":@-1,
-                                        @"message":task.error
-                                };
-                                [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
-                            }
+                if (!task.error) {
+                    NSDictionary *dictionary = @{
+                            @"isSuccess": @YES,
+                            @"completerId": completerId,
+                            @"code": @0
+                    };
+                    [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
+                } else {
+                    NSDictionary *dictionary = @{
+                            @"isSuccess": @NO,
+                            @"completerId": completerId,
+                            @"code": @-1,
+                            @"message": task.error
+                    };
+                    [_OSSMethodChannel invokeMethod:@"FlutterOSS:uploadAsyncResult" arguments:dictionary];
+                }
 
-                 });
-               return nil;
+            });
+            return nil;
 
-            }];
+        }];
     });
 
 
